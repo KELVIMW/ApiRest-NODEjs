@@ -1,0 +1,213 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Drones</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.17-beta.0/vue.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <style>
+    .section-container {
+      max-width: 800px;
+      margin-right: auto;
+      margin-left: auto;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="container">
+    <section class="section section-container" style="padding-top: 24px; padding-bottom: 5px;">
+        <h2 class="title">Drones</h2>
+        <drone v-for="drone in drones"
+            :key="drone.name"
+            :drone="drone"
+            @save-drone="onAddOrUpdateDrone" 
+            @delete-drone="deleteDrone" />
+    </section>
+    <section class="section section-container" style="padding-bottom: 10px;">
+      <div class="box">
+        <add-update-drone title="Add Drone" @save-drone="onAddOrUpdateDrone" />
+      </div>
+    </section>
+  </div>
+  <script>
+  const AddUpdateDrone = {
+    props: ['drone', 'title'],
+    data () {
+      return {
+        id: this.drone ? this.drone.id : null,
+        customer_image: this.drone ? this.drone.customer_image : '',
+        customer_name: this.drone ? this.drone.customer_name : '',
+        customer_address: this.drone ? this.drone.customer_address : '',
+        battery: this.drone ? this.drone.battery : null,
+        max_speed: this.drone ? this.drone.max_speed : null,
+        average_speed: this.drone ? this.drone.average_speed : null,
+        status: this.drone ? this.drone.status : '',
+        current_fly: this.drone ? this.drone.current_fly : null
+      }
+    },
+    methods: {
+      save() {
+        this.$emit('save-drone', { id: this.id, customer_image: this.customer_image, customer_name: this.customer_name, customer_address: this.customer_address, battery: this.battery, max_speed: this.max_speed, average_speed:this.average_speed, status: this.status, current_fly: this.current_fly })
+        if (!this.id) {
+            this.customer_image = '',
+            this.customer_name = '',
+            this.customer_address = '',
+            this.battery = null,
+            this.max_speed = null,
+            this.average_speed = null,
+            this.status = '',
+            this.current_fly = null
+        }
+      }
+    },
+    template: `
+      <form class="form" @submit.prevent="save">
+        <h3 class='subtitle'>{{ title }}</h3>
+        <div class="field">
+            <label>customer_image/label>
+            <div class="control">
+              <input class="input" type="text" v-model="customer_image">
+            </div> 
+        </div>
+        <div class="field">
+            <label>customer_name/label>
+            <div class="control">
+              <input class="input" type="text" v-model="customer_name">
+            </div> 
+        </div>
+        <div class="field">
+            <label>customer_address</label>
+            <div class="control">
+              <input class="input" type="text" v-model="customer_address">
+            </div> 
+        </div>
+        <div class="field">
+            <label>battery</label>
+            <div class="control">
+              <input class="input" type="integer" v-model="battery">
+            </div> 
+        </div>
+        <div class="field">
+            <label>max_speed</label>
+            <div class="control">
+              <input class="input" type="real" v-model="max_speed">
+            </div> 
+        </div>
+        <div class="field">
+            <label>average_speed</label>
+            <div class="control">
+              <input class="input" type="real" v-model="average_speed">
+            </div> 
+        </div>
+        <div class="field">
+            <label>status</label>
+            <div class="control">
+              <input class="input" type="text" v-model="status">
+            </div> 
+        </div>
+        <div class="field">
+            <label>current_fly</label>
+            <div class="control">
+              <input class="input" type="integer" v-model="current_fly">
+            </div> 
+        </div>
+        <div class="field">
+            <div class="control">
+              <button class="button is-success">Save</button>
+            </div> 
+        </div>
+      </form>
+    `
+  }
+  const Drone = {
+    props: ['drone'],
+    components: { 'add-update-drone': AddUpdateDrone },
+    data () {
+      return {
+        showDetail: false
+      }
+    },
+    methods: {
+      onAddOrUpdateDrone(drone) {
+        this.$emit('save-drone', drone)
+      },
+      deleteDrone (drone) {
+        this.$emit('delete-drone', drone)
+      }
+    },
+    template: `
+      <div class="card">
+        <header class="card-header">
+          <p @click="showDetail = !showDetail" class="card-header-title">
+            {{ drone.customer_image }} {{ drone.customer_name }} {{ drone.customer_address }} {{ drone.battery }} {{ drone.max_speed }} {{ drone.average_speed }} {{ drone.status }} {{ drone.current_fly }}
+          </p>
+          <a class="card-header-icon" @click.stop="deleteDrone(drone)">
+            <span class="icon">
+              <i class="fa fa-trash"></i>
+            </span>
+          </a>
+        </header>
+        <div v-show="showDetail" class="card-content">
+            <add-update-drone title="Details" :drone="drone" @save-drone="onAddOrUpdateDrone" />
+        </div>
+      </div>
+    `
+  }
+  new Vue({
+    el: '#app',
+    components: { drone: Drone, 'add-update-drone': AddUpdateDrone },
+    data: {
+      drones: [],
+      apiURL: 'http://localhost:3000/drones'
+    },
+    methods: {
+      onAddOrUpdateDrone (drone) {
+        if (drone.id) {
+          this.updateDrone(drone)
+        } else {
+          this.addDrone(drone)
+        }
+      },
+      addDrone (drone) {
+        return axios.post(this.apiURL, drone)
+          .then((response) => {
+            const copy = this.drones.slice()
+            copy.push(response.data)
+            this.drones = copy
+          })
+      },
+      updateDrone (drone) {
+        return axios.put(`${this.apiURL}/${drone.id}`, drone)
+          .then((response) => {
+            const copy = this.drones.slice()
+            const idx = copy.findIndex((c) => c.id === response.data.id)
+            copy[idx] = response.data
+            this.drones = copy
+          })
+      },
+      deleteDrone (drone) {
+        console.log('deleting', drone)
+        return axios.delete(`${this.apiURL}/${drone.id}`)
+          .then((response) => {
+            let copy = this.drones.slice()
+            const idx = copy.findIndex((c) => c.id === response.data.id)
+            copy.splice(idx, 1)
+            this.drones = copy
+          })
+      }
+    },
+    beforeMount () {
+      axios.get(this.apiURL)
+        .then((response) => {
+          this.drones = response.data
+        })
+    }
+  })
+  </script>
+</body>
+</html>
