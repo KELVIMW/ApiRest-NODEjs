@@ -20,7 +20,6 @@ npm install
 
 ```sh
 sequelize db:migrate
-sequelize db:seed:all
 ```
 
 4) Run
