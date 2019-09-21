@@ -3,27 +3,27 @@ Simples API_REST feito em node.js, com banco SQLite, ORM sequelize e REST expres
 
 ## Usage
 
-1) Clone repo
+1) Clone
 
 ```sh
 git clone https://github.com/KELVIMW/ApiRest-NODEjs.git
 ```
 
-2) install dependencies (Built with Node.js version 8.10)
+2) Dependencias (Built with Node.js version 8.10)
 
 ```sh
 cd ApiRest-NODEjs/
 npm install
 ```
 
-3) run migrations and seeders
+3) Configuração
 
 ```sh
 sequelize db:migrate
 sequelize db:seed:all
 ```
 
-4) start express server
+4) Run
 
 ```sh
 npm start
